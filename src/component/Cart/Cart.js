@@ -1,36 +1,54 @@
-import {useContext} from'react';
-import Modal from '../UI/Modal';
-import classes from './Cart.module.css';
-import CartContext from '../../store/cart-context';
-import CartItem from './CartItem';
+import { useContext } from "react";
+import Modal from "../UI/Modal";
+import classes from "./Cart.module.css";
+import CartContext from "../../store/cart-context";
 
 const Cart = (props) => {
-  const cartcntx=useContext(CartContext);
-  const totalAmount=`$${cartcntx.totalAmount.toFixed(2)}`;
+  const cartCtx = useContext(CartContext);
 
- 
+  const increaseQuantityHandler = (item) => {
+    cartCtx.addItem({ ...item, quantity: 1 });
+  };
+
+  const decreaseQuantityHandler = (item) => {
+    cartCtx.removeItem(item);
+  };
+
   const cartItems = (
-    <ul className={classes['cart-items']}>
-      {cartcntx.items.map((item) => (
-        <CartItem key={item.id} 
-        name={item.name} 
-        amount={item.amount} 
-        price={item.price} 
-       
-        />
-      ))}
+    <ul className={classes["cart-items"]}>
+      {cartCtx.items.map((item) => {
+        return (
+          <li key={item.id}>
+            <div className={classes.total}>
+              <h3>{item.name}</h3>
+              <span>{item.quantity}</span>
+              <div className={classes.price}>${item.price.toFixed(2)}</div>
+            </div>
+
+            <div className={classes.actions}>
+              <button onClick={() => decreaseQuantityHandler(item)}>-</button>
+              <button onClick={() => increaseQuantityHandler(item)}>+</button>
+            </div>
+          </li>
+        );
+      })}
     </ul>
   );
+
+  let amount = 0;
+  cartCtx.items.forEach((item) => {
+    amount = amount + Number(item.price * item.quantity);
+  });
 
   return (
     <Modal onClose={props.onClose}>
       {cartItems}
       <div className={classes.total}>
         <span>Total Amount</span>
-        <span>{totalAmount}</span>
+        <span>${amount.toFixed(2)}</span>
       </div>
       <div className={classes.actions}>
-        <button className={classes['button--alt']} onClick={props.onClose}>
+        <button onClick={props.onClose} className={classes["button--alt"]}>
           Close
         </button>
         <button className={classes.button}>Order</button>
